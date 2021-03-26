@@ -1,7 +1,6 @@
 <?php
 		include 'database/insert.php';
 		include 'database/search.php';
-
 		$jsonDecode = (array)json_decode($_POST['jsonData']);
 		$name = $email= $subject = $body =$message="";
 		$name = $jsonDecode['name'];
@@ -14,97 +13,58 @@
 		$device_addr = gethostbyaddr($_SERVER['REMOTE_ADDR']);
 		$device_name = gethostbyname($device_addr);
 		require 'PhpMailer/PHPMailerAutoload.php';
-		$search = search($email);
+		
+		$mail = new PHPMailer;
+		$mail2 = new PHPMailer;
+
+		$mail->isSMTP();                                     
+		$mail->Host = 'smtp.gmail.com'; 
+		$mail->SMTPAuth = true;                               
+		$mail->Username = 'mailserveraddress';             
+		$mail->Password = 'mailserverpass';                         
+		$mail->SMTPSecure = 'tls';                            
+		$mail->Port = 587;  
+
+		$mail2->isSMTP();                                     
+		$mail2->Host = 'smtp.gmail.com'; 
+		$mail2->SMTPAuth = true;                               
+		$mail2->Username = 'mailserveraddress';       
+		$mail2->Password = 'mailserverpass';               
+		$mail2->SMTPSecure = 'tls';                            
+		$mail2->Port = 587;
+
+		$mail->isHTML(true);
+		$mail2->isHTML(true);
+
+        $mail->setFrom($email," From Your Portfolio Site By ".$name);
+		$mail->addAddress('yourgmail@gmail.com', 'yourname');
+		$mail2->setFrom('mailserveraddress.com',"your Portfolio");
+		$mail2->addAddress($email, $name);
+
+		$mail->Subject = $subject;
+        $mail->Body    = '<b style="font-size:30px">'.$body.'</b>';
+        $mail2->Subject = 'Hello '.$name;
+
+        $search = search('database_field');
+        
 		if($search==1){
-
-			$mail = new PHPMailer;
-			$mail2 = new PHPMailer;
-
-			$mail->isSMTP();                                     
-			$mail->Host = 'smtp.gmail.com'; 
-			$mail->SMTPAuth = true;                               
-			$mail->Username = 'mailserveraddress@gmail.com';     
-			$mail->Password = 'xxxxxxxxxxxx';            
-			$mail->SMTPSecure = 'tls';                            
-			$mail->Port = 587;  
-
-			$mail2->isSMTP();                                     
-			$mail2->Host = 'smtp.gmail.com'; 
-			$mail2->SMTPAuth = true;                               
-			$mail2->Username = 'mailserveraddress@gmail.com';
-			$mail2->Password = 'xxxxxxxxxxx';                   
-			$mail2->SMTPSecure = 'tls';                            
-			$mail2->Port = 587; 
-
-			$mail->setFrom($email," From Your Portfolio Site By ".$name);
-			$mail->addAddress('yourgmail@gmail.com', 'your name');
-
-			$mail2->setFrom('mailserveraddress@gmail.com',"your Portfolio");
-			$mail2->addAddress($email, $name); 
-
-
-			$mail->isHTML(true);
-			$mail2->isHTML(true);                             
-
-			$mail->Subject = $subject;
-			$mail->Body    = $body;
-
-			$mail2->Subject = 'Hello '.$name;
-			$mail2->Body    = '<b>Thank you for again contact me</b>';
-
-			if(!$mail->send() || !$mail2->send()) {
-				echo 'Message could not be sent.';
-				echo 'Mailer Error: ' . $mail->ErrorInfo;
-				echo 'Mailer Error: ' . $mail2->ErrorInfo;
-			} else {
-				echo connect($name,$email,$subject,$body,$CurrentdateAndTime,$device_name,$device_addr);
-				$message = 'Message has been sent';
-				echo $message;
-			}
+			$mail2->Body    = '<b style="font-size:30px;">Thank you for again contact me</b>';
 		}else{
-			$mail = new PHPMailer;
-			$mail2 = new PHPMailer;
+			$mail2->Body    = '<b stye="font-size:30px;">Thank you for contact me</b>';
+	    }
 
-			$mail->isSMTP();                                     
-			$mail->Host = 'smtp.gmail.com'; 
-			$mail->SMTPAuth = true;                               
-			$mail->Username = 'mailserveraddress@gmail.com';          
-			$mail->Password = 'xxxxxxxxxxxx';                         
-			$mail->SMTPSecure = 'tls';                            
-			$mail->Port = 587;  
-
-			$mail2->isSMTP();                                     
-			$mail2->Host = 'smtp.gmail.com'; 
-			$mail2->SMTPAuth = true;                               
-			$mail2->Username = 'mailserveraddress@gmail.com'; 
-			$mail2->Password = 'xxxxxxxxxxx';                      
-			$mail2->SMTPSecure = 'tls';                            
-			$mail2->Port = 587; 
-
-			$mail->setFrom($email," From Your Portfolio Site By ".$name);
-			$mail->addAddress('yourgmail@gmail.com', 'your name');
-
-			$mail2->setFrom('yourgmail@gmail.com',"your Portfolio");
-			$mail2->addAddress($email, $name);
-
-
-			$mail->isHTML(true);
-			$mail2->isHTML(true);                             
-
-			$mail->Subject = $subject;
-			$mail->Body    = $body;
-
-			$mail2->Subject = 'Hello '.$name;
-			$mail2->Body    = '<b>Thank you for contact me</b>';
-
-			if(!$mail->send() || !$mail2->send()) {
+        if(!$mail->send() || !$mail2->send()) {
 				echo 'Message could not be sent.';
 				echo 'Mailer Error: ' . $mail->ErrorInfo;
 				echo 'Mailer Error: ' . $mail2->ErrorInfo;
-			} else {
-				echo connect($name,$email,$subject,$body,$CurrentdateAndTime,$device_name,$device_addr);
-				$message = 'Message has been sent';
-				echo $message;
-			}
-	}
+		} else {
+				$insert = connect('database_fields');
+				if($insert==1){
+					$message = 'Message has been sent';
+					echo $message;
+				}else{
+					$message =  "We couldn't send the message";
+					echo $message;
+				}
+		}
 ?>

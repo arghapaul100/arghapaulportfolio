@@ -2,9 +2,9 @@
 
 	include 'db_connect.php';
 
-	function search($email){
+	function search('database_field'){
 
-		$sql = "select * from tablename where email ='$email'";
+		$sql = "select * from tablename where field ='data'";
 
 		$result = mysqli_query($_SESSION['con'],$sql);
 
